@@ -1,0 +1,105 @@
+{
+  "version": 1.0,
+  "case": {
+    "mesh_file": "box.nmsh",
+    "time": {
+      "end_time": 200,
+      "variable_timestep": true,
+      "target_cfl": 0.5,
+      "max_timestep": 0.02,
+      "checkpoint_control": "simulationtime",
+      "checkpoint_value": 1.0,
+      "output_at_end": true,
+      "output_boundary": true,
+      "output_checkpoints": true
+    },
+    "numerics": {
+      "time_order": 3,
+      "polynomial_order": 7,
+      "dealias": true
+    },
+    "fluid": {
+      "scheme": "pnpn",
+      "nut_field": "nut",
+      "Re": 2300,
+      "full_stress_formulation": true,
+      "initial_condition": {
+        "type": "user"
+      },
+      "velocity_solver": {
+        "type": "coupledcg",
+        "absolute_tolerance": 1e-4,
+        "preconditioner": {
+          "type": "jacobi"
+        }
+      },
+      "pressure_solver": {
+        "type": "gmres",
+        "absolute_tolerance": 1e-4,
+        "preconditioner": {
+          "type": "hsmg"
+        }
+      },
+      "boundary_conditions": [
+        {
+          "type": "no_slip",
+          "zone_indices": [3, 4]
+        }
+      ],
+      "flow_rate_force": {
+                "direction": 1,
+                "value": 1,
+                "use_averaged_flow": true
+      },
+      "output_control": "simulationtime",
+      "output_value": 1
+    },
+    "simulation_components": [
+      {
+        "type": "fluid_stats",
+        "output_control": "simulationtime",
+        "output_value": 1,
+        "start_time": 1,
+        "compute_control": "tsteps",
+        "compute_value": 1,
+        "avg_direction": "xz",
+        "set_of_stats": "basic"
+      },
+      {
+        "type": "les_model",
+        "model": "smagorinsky",
+        "c_s": 0.171,
+        "delta_type": "pointwise",
+        "nut_field": "nut",
+        "compute_control": "tsteps",
+        "compute_value": 1,
+        "output_control": "simulationtime"
+      },
+      {
+                "type": "force_torque",
+		"output_control": "simulationtime",
+                "compute_control": "tsteps",
+		"output_value": 1,
+		"start_time": 1,
+                "compute_value": 1,
+                "zone_id": 3,
+                "zone_name": "Bottom wall",
+                "center": [ 6.28, -1, 2.1],
+                "scale": 0.01899, // 1 over area of wall (scale=1/(4pi*4/3pi))
+            },
+            {
+                "type": "force_torque",
+		"output_control": "simulationtime",
+                "compute_control": "tsteps",
+		"output_value": 1,
+		"start_time": 1,
+                "compute_value": 1,
+                "zone_id": 4,
+                "zone_name": "Top wall",
+                "center": [ 6.28, -1, 2.1],
+                "scale": 0.01899, // 1 over area of wall (scale=1/(4pi*4/3pi))
+            },
+
+    ]
+  }
+}
